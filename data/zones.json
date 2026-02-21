@@ -1,0 +1,16 @@
+[
+  {
+    "id": "downtown-1",
+    "name": "Downtown Core",
+    "provider": "DemoParkingProvider",
+    "rate_cents_per_hour": 350,
+    "bbox": [-122.426, 37.772, -122.41, 37.784]
+  },
+  {
+    "id": "midtown-2",
+    "name": "Midtown Retail",
+    "provider": "DemoParkingProvider",
+    "rate_cents_per_hour": 250,
+    "bbox": [-122.41, 37.768, -122.398, 37.78]
+  }
+]

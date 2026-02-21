@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  phone_encrypted   String?
+  name              String?
+  stripe_customer_id String?
+  created_at        DateTime @default(now())
+  cars              Car[]
+  sessions          ParkingSession[]
+  auditLogs         AuditLog[]
+}
+
+model Car {
+  id              String @id @default(cuid())
+  user_id         String
+  plate_encrypted String
+  label           String
+  is_default      Boolean @default(false)
+  user            User @relation(fields: [user_id], references: [id])
+}
+
+model Zone {
+  id                  String @id
+  name                String
+  provider            String
+  rate_cents_per_hour Int
+  bbox_json           String
+}
+
+model ParkingSession {
+  id                 String   @id @default(cuid())
+  user_id            String
+  car_id             String
+  zone_id            String
+  provider           String
+  start_time         DateTime
+  end_time           DateTime
+  amount_cents       Int
+  status             String
+  external_reference String
+  created_at         DateTime @default(now())
+  user               User     @relation(fields: [user_id], references: [id])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  user_id       String
+  action        String
+  metadata_json String
+  created_at    DateTime @default(now())
+  user          User     @relation(fields: [user_id], references: [id])
+}
