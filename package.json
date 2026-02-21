@@ -6,8 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "tauri": "tauri"
+    "lint": "eslint .",
+    "test": "node --test tests/*.test.mjs",
+    "worker": "node worker/index.mjs",
+    "prisma:migrate": "echo 'Run prisma migrate dev once prisma is installed'",
+    "prisma:seed": "node prisma/seed.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",

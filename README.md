@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Help Me Park (MVP)
 
-## Getting Started
+Help Me Park is a demo MVP where a parked user presses **Help me park** and buys parking for the detected zone.
 
-First, run the development server:
+## Features
+- Auth with email + password (`/login`)
+- One-time setup (`/setup`) for name, phone, default car, and mock Stripe vaulting
+- Main flow (`/app`) with GPS or manual lat/lng, zone lookup from `data/zones.json`
+- Intent phrase to duration mapper (`quick errand`, `coffee`, `dinner date`, `movie`, default)
+- Confirmation and purchase (`/park/confirm`)
+- Session receipt/countdown (`/session/:id`)
+- Demo provider portal (`/provider-portal`) and adapter abstraction
+- Worker sends SMS reminder 10 mins before expiry; webhook handles YES renewals
+- Audit logs for purchase attempts in `data/db.json`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+> Demo provider portal and automation are **demo only**.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Monorepo layout
+- `app/` Next.js web app + API routes
+- `lib/` shared logic (auth, encryption, provider adapter, rate limit, zones)
+- `worker/` reminder worker
+- `agent/providers/demo/` demo automation stub
+- `prisma/` schema + seed scaffold
+- `data/` zones dataset and JSON persistence file
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## One-command-ish local setup
+1. `cp .env.example .env`
+2. `docker compose up -d`
+3. `npm install` (or `pnpm install` if preferred)
+4. `npm run prisma:migrate`
+5. `npm run prisma:seed`
+6. Run app and worker in separate terminals:
+   - `npm run dev`
+   - `npm run worker`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
+See `.env.example` for:
+- `DATABASE_URL`
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`
+- `APP_ENCRYPTION_KEY`
+- `BASE_URL`
 
-## Learn More
+## Mock mode
+- Missing Stripe keys => setup stores mock Stripe IDs.
+- Missing Twilio keys => SMS logs to console.
 
-To learn more about Next.js, take a look at the following resources:
+## Tests
+- `npm test`
+  - intent mapper unit test
+  - zone lookup integration-ish test
+  - purchase flow smoke test (demo provider pricing)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Adding real providers next
+1. Implement `ParkingProvider` in `lib/provider.ts`.
+2. Add real Playwright automation in `agent/providers/<provider>/`.
+3. Add provider-specific credentials env vars.
+4. Map zones to the new provider in `data/zones.json`.
+5. Move persistence from JSON to Prisma/Postgres runtime implementation.
